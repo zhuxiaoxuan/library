@@ -26,8 +26,11 @@ import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
+import jp.co.cyberagent.android.gpuimage.util.EventUtil;
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -48,6 +51,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 	static final float CUBE[] = { -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
 			1.0f, };
 
+	private Handler mHandler;
 	private GPUImageFilter mFilter;
 	/**
 	 * 当前的data流 供人脸识别用
@@ -89,6 +93,13 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 				.allocateDirect(TEXTURE_NO_ROTATION.length * 4)
 				.order(ByteOrder.nativeOrder()).asFloatBuffer();
 		setRotation(Rotation.NORMAL, false, false);
+	}
+	/**
+	 * 设置handler
+	 * @param handler
+	 */
+	public void setHandler(Handler handler){
+		mHandler=handler;
 	}
 
 	/**
@@ -146,8 +157,14 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
 
 	@Override
 	public void onPreviewFrame(final byte[] data, final Camera camera) {
-
+		
 		mData = data;
+		if(data!=null){
+			Message m=mHandler.obtainMessage();
+			m.what=EventUtil.UPDATE_FACE_RECT;
+			m.obj=data;
+			m.sendToTarget();
+		}
 		final Size previewSize = camera.getParameters().getPreviewSize();
 		if (mGLRgbBuffer == null) {
 			mGLRgbBuffer = IntBuffer.allocate(previewSize.width

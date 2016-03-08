@@ -16,6 +16,15 @@
 
 package jp.co.cyberagent.android.gpuimage;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -37,19 +46,14 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-
-import java.io.*;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
  * The main accessor for GPUImage functionality. This class helps to do common
  * tasks through a simple interface.
  */
+@TargetApi(Build.VERSION_CODES.FROYO)
 public class GPUImage {
 	private final Context mContext;
 	private final GPUImageRenderer mRenderer;
@@ -247,6 +251,13 @@ public class GPUImage {
 		mRenderer.deleteImage();
 		mCurrentBitmap = null;
 		requestRender();
+	}
+	/**
+	 * …Ë÷√handler
+	 * @param handler
+	 */
+	public void setHandler(Handler handler){
+		mRenderer.setHandler(handler);
 	}
 
 	/**
@@ -630,6 +641,7 @@ public class GPUImage {
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private abstract class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
 
 		private final GPUImage mGPUImage;
